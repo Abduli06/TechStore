@@ -83,7 +83,7 @@ techstore/
 ## 4. Endpoints de la API REST
 
 | Método | Endpoint | Descripción  |
-| :--- | :--- | :--- | :--- |
+| :--- | :--- | :--- | 
 | **GET** | `/orders/{order_id}` | Consulta el estado, unidades y total de un pedido |
 | **POST** | `/orders/{order_id}/confirm` | Confirma un pedido en borrador | 
 | **POST** | `/orders/{order_id}/ship` | Registra el envío del pedido con su guía |
