@@ -31,7 +31,7 @@ def confirm_order(order_id: str):
     except InvalidOrderData as exc:
         raise HTTPException(status_code=422, detail=str(exc))
         
-    return {"id": order.id, "status": order.status.value}
+    return {"id": order.id, "status": order.status.value, "detail": "El pedido ha sido confirmado"}
 
 @app.post("/orders/{order_id}/ship")
 def ship_order(order_id: str, tracking_number: str = Query(..., description="Número de guía de envío")):
@@ -46,7 +46,7 @@ def ship_order(order_id: str, tracking_number: str = Query(..., description="Nú
     except InvalidOrderData as exc:
         raise HTTPException(status_code=422, detail=str(exc))
         
-    return {"id": order.id, "status": order.status.value}
+    return {"id": order.id, "status": order.status.value, "detail": "El pedido ya va en camino" }
 
 @app.post("/orders/{order_id}/cancel")
 def cancel_order(order_id: str, reason: str = Query(..., description="Motivo de la cancelación")):
@@ -61,4 +61,4 @@ def cancel_order(order_id: str, reason: str = Query(..., description="Motivo de 
     except InvalidOrderData as exc:
         raise HTTPException(status_code=422, detail=str(exc))
         
-    return {"id": order.id, "status": order.status.value}
+    return {"id": order.id, "status": order.status.value, "detail": "El pedido ha sido cancelado"}

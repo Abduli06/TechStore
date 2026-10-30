@@ -6,9 +6,6 @@ from datetime import datetime, timezone
 MAX_UNITS = 20
 
 
-
-
-
 class DomainException(Exception):
     pass
 
@@ -23,8 +20,6 @@ class InvalidOrderTransition(DomainException):
 
 class OrderItemLimitExceeded(DomainException):
     pass
-
-
 
 
 
@@ -115,7 +110,7 @@ class Order:
 
     def add_item(self, item):
         if self.status != OrderStatus.DRAFT:
-            raise InvalidOrderTransition("Solo se pueden agregar artículos a un pedido en DRAFT")
+            raise InvalidOrderTransition("Solo se pueden agregar artículos a un pedido en preparacion")
         if self.units + item.quantity > MAX_UNITS:
             raise OrderItemLimitExceeded("El pedido no puede pasar de 20 unidades")
         if item.unit_price.currency != "MXN":
@@ -127,7 +122,7 @@ class Order:
 
     def confirm(self):
         if self.status != OrderStatus.DRAFT:
-            raise InvalidOrderTransition("Solo se puede confirmar un pedido en DRAFT")
+            raise InvalidOrderTransition("No se puede confirmar un pedido que haya sido confirmado")
         if not self.items or not self.customer.active:
             raise InvalidOrderData("El pedido necesita artículos y un cliente activo")
         self.status = OrderStatus.CONFIRMED
@@ -135,7 +130,7 @@ class Order:
 
     def ship(self, tracking_number):
         if self.status != OrderStatus.CONFIRMED:
-            raise InvalidOrderTransition("Solo se puede enviar un pedido CONFIRMED")
+            raise InvalidOrderTransition("Solo se puede enviar un pedido confirmado")
         if not tracking_number or not tracking_number.strip():
             raise InvalidOrderData("Falta el número de guía")
         self.status = OrderStatus.SHIPPED
@@ -143,7 +138,7 @@ class Order:
 
     def cancel(self, reason):
         if self.status != OrderStatus.CONFIRMED:
-            raise InvalidOrderTransition("Solo se puede cancelar un pedido CONFIRMED")
+            raise InvalidOrderTransition("Solo se puede cancelar un pedido confirmado antes de enviarse")
         if not reason or not reason.strip():
             raise InvalidOrderData("Falta el motivo de cancelación")
         self.status = OrderStatus.CANCELLED
@@ -151,12 +146,12 @@ class Order:
 
     def deliver(self):
         if self.status != OrderStatus.SHIPPED:
-            raise InvalidOrderTransition("Solo se puede entregar un pedido SHIPPED")
+            raise InvalidOrderTransition("Solo se puede entregar un pedido en transito/enviado")
         self.status = OrderStatus.DELIVERED
         self.events.append(DomainEvent("OrderDelivered", self.id))
 
     def return_order(self):
         if self.status != OrderStatus.SHIPPED:
-            raise InvalidOrderTransition("Solo se puede devolver un pedido SHIPPED")
+            raise InvalidOrderTransition("Solo se puede devolver un pedido en transito/enviado")
         self.status = OrderStatus.RETURNED
         self.events.append(DomainEvent("OrderReturned", self.id))
